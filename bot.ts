@@ -335,13 +335,16 @@ async function renderScheduleImage(schedule: Array<Schedule>, groupNo: string, s
     const startY = headerHeight + padding;
 
     // Draw hour headers
-    ctx2d.font = "bold 14px Arial";
+    ctx2d.font = "bold 10px Arial";
     ctx2d.textAlign = "center";
     ctx2d.fillStyle = "#cccccc";
     
     for (let h = 1; h <= 24; h++) {
         const x = startX + dayNameWidth + ((h - 1) * cellWidth) + (cellWidth / 2);
-        ctx2d.fillText(h.toString(), x, startY - 10);
+        const startHour = (h - 1).toString().padStart(2, '0');
+        const endHour = h.toString().padStart(2, '0');
+        ctx2d.fillText(`${startHour}:00`, x, startY - 20);
+        ctx2d.fillText(`${endHour}:00`, x, startY - 8);
     }
 
     // Draw schedule rows
@@ -641,9 +644,13 @@ async function checkAndNotifyBlackouts() {
         
         const { groupsData } = await fetchAllData();
         const now = new Date();
-        const currentHour = now.getHours() + 1; // H01 = 0:00-1:00, H02 = 1:00-2:00, etc
-        const currentMinute = now.getMinutes();
-        const currentDate = now.toISOString().split('T')[0]!; // YYYY-MM-DD
+        
+        const utcOffset = 2 * 60;
+        const localTime = new Date(now.getTime() + utcOffset * 60 * 1000);
+        
+        const currentHour = localTime.getUTCHours() + 1;
+        const currentMinute = localTime.getUTCMinutes();
+        const currentDate = localTime.toISOString().split('T')[0]!;
         
         if (currentMinute < 50 || currentMinute > 55) {
             console.log(`[${new Date().toISOString()}] Not in notification window (current minute: ${currentMinute})`);
