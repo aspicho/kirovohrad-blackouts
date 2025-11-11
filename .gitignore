@@ -1,0 +1,5 @@
+.env
+node_modules/
+*.db
+groups_data.json
+groups_map.json
